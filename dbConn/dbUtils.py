@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 #python operate mysql database
-import MySQLdb
-
+import pymysql
+'''
+保存所有基金编码到数据库
+'''
 #数据库名称
 DATABASE_NAME = ''
 #host = 'localhost' or '172.0.0.1'
@@ -31,7 +33,7 @@ def init():
  #获取数据库连接
 def get_conn():
    init()
-   return MySQLdb.connect(host = HOST, user = USER_NAME, passwd = PASSWORD, db = DATABASE_NAME, charset = CHAR_SET)
+   return pymysql.connect(host = HOST, user = USER_NAME, passwd = PASSWORD, db = DATABASE_NAME, charset = CHAR_SET)
 #获取cursor
 def get_cursor(conn):
        return conn.cursor()

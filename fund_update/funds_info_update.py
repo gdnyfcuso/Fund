@@ -1,8 +1,7 @@
 # -*- encoding: utf-8 -*-
-import urllib
-import urllib2
+import urllib.request
 import time
-import MySQLdb
+import pymysql
 import sys
 sys.path.append('D:/Users/030031/PycharmProjects/Funds/dbConn')
 import dbUtils
@@ -19,7 +18,7 @@ row=1
 count = 1
 while line:
         count +=1
-        if(count>550):#中断后继续
+        if(count>1):#中断后继续
             try:
 
                     sql_info = 'select * from fund_daily_nav where fund_code = \''+line.strip()+'\' and dt = DATE_SUB(curdate(),INTERVAL 0 DAY) '
@@ -27,9 +26,9 @@ while line:
                     info = cursor.fetchone()
                     if info == None:
                         tempUrl = fundurl.replace('**', line.strip())
-                        request = urllib2.Request(tempUrl)
-                        response = urllib2.urlopen(request)
-                        content = response.read()
+                        #request = urllib.request.Request(tempUrl)
+                        response = urllib.request.urlopen(tempUrl)
+                        content = response.read().decode()
                         content = content[content.index('<tbody>'):content.index('</tbody>')]
                         hisArrayData = content.split('</tr>')
                         for hisData in hisArrayData:
@@ -44,26 +43,27 @@ while line:
                             tmData = hisData.split(',')
                             max_id += 1
                             # 检查是否已经同步
-                            print time.strftime('%Y-%m-%d')
-                        if tmData[0] == '2017-09-26':
+                            #print time.strftime('%Y-%m-%d')
+                        if tmData[0] == '2017-09-29':
                             if tmData[3] == '':
                                 tmData[3] = '0.0%'
                             sql = 'INSERT INTO fund_daily_nav(id,fund_code, dt, nav, acc_nav,rate,update_dt)'
-                            sql += ' VALUES (' + bytes(max_id) + ',\'' + line.strip() + '\',DATE_FORMAT(\'' + tmData[
-                                0] + '\', \'%Y-%m-%d\'),' + tmData[1] + ',' + tmData[2] + ',' + tmData[3].replace('%', '0') + ',now())'
+                            sql += ' VALUES (' + str(max_id) + ',\'' + line.strip() + '\',DATE_FORMAT(\'' + tmData[0] + '\', \'%Y-%m-%d\'),'
+                            sql += tmData[1] + ','
+                            sql += tmData[2] + ','
+                            sql += tmData[3].replace('%', '0') + ',now())'
                             row+=1
-                            print line.strip(), tmData
+                            print (line.strip(), tmData)
                             cursor.execute(sql)
                             if(row == 5):
                                 conn.commit()
                                 row=1
 
 
-            except urllib2.URLError, e:
-                    if hasattr(e, "code"):
-                       print e.code
-                    if hasattr(e, "reason"):
-                       print e.reason
+
+            except urllib.error.HTTPError as e:
+                print(e.code())
+                print(e.read().decode('utf-8'))
         line = f.readline()
 conn.commit()
 f.close()

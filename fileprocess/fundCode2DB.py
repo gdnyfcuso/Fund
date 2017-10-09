@@ -16,7 +16,7 @@ while line:
         # 执行sql语句
         cursor.execute(sql)
         # 提交到数据库执行
-        print sql
+        print (sql)
         count+=1
         if count == 500:
             conn.commit()
